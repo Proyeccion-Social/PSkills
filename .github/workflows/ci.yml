@@ -19,14 +19,64 @@ jobs:
           # Placeholder: integrar yamllint, jq u otro validador de sintaxis
 
       - name: Validar JSON Schema (esquemas)
+        if: github.event_name == 'pull_request'
+        shell: python
         run: |
-          echo "Validando esquemas JSON en /schemas..."
-          # Placeholder: integrar ajv u otro validador de JSON Schema
+          import json, jsonschema, pathlib, sys
+
+          print("Validando esquemas JSON en /schemas...")
+          schemas_dir = pathlib.Path("schemas")
+          errors = []
+
+          if not schemas_dir.exists():
+              print("Directorio /schemas no encontrado, se omite validación de esquemas.")
+              sys.exit(0)
+
+          for schema_file in schemas_dir.rglob("*.json"):
+              try:
+                  with open(schema_file, encoding="utf-8") as f:
+                      schema = json.load(f)
+                  jsonschema.Draft7Validator.check_schema(schema)
+                  print(f"OK: {schema_file}")
+              except Exception as e:
+                  errors.append(f"{schema_file}: {e}")
+                  print(f"ERROR: {schema_file}: {e}")
+
+          if errors:
+              print("\nErrores de validación de esquemas:")
+              for e in errors:
+                  print(f"  - {e}")
+              sys.exit(1)
 
       - name: Validar prompts y datasets
+        if: github.event_name == 'pull_request'
+        shell: python
         run: |
-          echo "Validando consistencia de prompts y datasets..."
-          # Placeholder: scripts de validación interna del equipo
+          import pathlib, sys
+
+          print("Validando consistencia de prompts y datasets...")
+          errors = []
+          prompts_dir = pathlib.Path("prompts")
+          datasets_dir = pathlib.Path("datasets")
+
+          for d in [prompts_dir, datasets_dir]:
+              if not d.exists():
+                  continue
+              for f in d.rglob("*"):
+                  if f.is_file() and f.suffix in [".txt", ".md", ".json", ".csv", ".jsonl"]:
+                      try:
+                          content = f.read_text(encoding="utf-8")
+                          if not content.strip():
+                              errors.append(f"{f}: archivo vacío")
+                      except UnicodeDecodeError:
+                          errors.append(f"{f}: no es texto UTF-8 válido")
+
+          if errors:
+              print("Errores de consistencia:")
+              for e in errors:
+                  print(f"  - {e}")
+              sys.exit(1)
+          print("Prompts y datasets válidos.")
 
       - name: Escaneo de secretos
         run: |
