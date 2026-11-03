@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar sintaxis YAML y JSON
+        run: |
+          echo "Validando archivos YAML y JSON del repositorio..."
+          # Placeholder: integrar yamllint, jq u otro validador de sintaxis
+
+      - name: Validar JSON Schema (esquemas)
+        run: |
+          echo "Validando esquemas JSON en /schemas..."
+          # Placeholder: integrar ajv u otro validador de JSON Schema
+
+      - name: Validar prompts y datasets
+        run: |
+          echo "Validando consistencia de prompts y datasets..."
+          # Placeholder: scripts de validación interna del equipo
+
+      - name: Escaneo de secretos
+        run: |
+          echo "Escaneando secretos hardcodeados (trufflehog/gitleaks)..."
+          # Placeholder: integrar trufflehog o gitleaks para evitar fugas de credenciales
+
+      - name: Validar commits convencionales
+        run: |
+          echo "Validando mensajes de commit convencionales..."
+          # Placeholder: integrar commitlint o validación custom de commits
+
+      - name: Validar plantilla de PR
+        run: |
+          echo "Verificando que el PR use el template y checklist completo..."
+          # Placeholder: validar cuerpo del pull request contra .github/pull_request_template.md
+
+      - name: Revisión de seguridad (skill pr-review)
+        run: |
+          echo "Ejecutando revisión de seguridad con la skill pr-review..."
+          # Placeholder: invocar la skill pr-review del equipo para verificar ausencia de fugas de seguridad

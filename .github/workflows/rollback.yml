@@ -1,0 +1,37 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag a eliminar
+        required: true
+      commit:
+        description: Commit SHA a revertir (opcional)
+        required: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Eliminar tag remoto
+        run: |
+          git push origin --delete ${{ github.event.inputs.tag }}
+          echo "Tag ${{ github.event.inputs.tag }} eliminado"
+
+      - name: Revertir commit si se indicó
+        if: github.event.inputs.commit != ''
+        run: |
+          git revert --no-commit ${{ github.event.inputs.commit }}
+          git commit -m "chore(release): rollback de ${{ github.event.inputs.commit }}"
+          git push origin main

@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Obtener último tag SemVer
+        id: last-tag
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Determinar tipo de bump (commits convencionales)
+        id: bump
+        run: |
+          # Analiza commits desde el último tag para decidir major/minor/patch
+          # feat: -> minor, fix: -> patch, BREAKING CHANGE -> major
+          echo "bump=patch" >> $GITHUB_OUTPUT
+          # Placeholder: integrar semantic-release o lógica custom de bump
+
+      - name: Crear tag SemVer ligero
+        run: |
+          NEW_TAG="v1.0.0"
+          echo "Creando tag $NEW_TAG"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
+
+      - name: Validar flujo de release
+        run: |
+          echo "Validando que el release respete el flujo CI/CD..."
+          # Placeholder: verificar que CI pasó antes de permitir el release
+
+      - name: Rollback ante incumplimiento
+        if: failure()
+        run: |
+          echo "Se detectó incumplimiento del flujo. Ejecutando rollback inmediato..."
+          # Placeholder: eliminar tag creado y revertir merge si es necesario

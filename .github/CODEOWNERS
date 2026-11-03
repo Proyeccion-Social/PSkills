@@ -1,0 +1,9 @@
+# Staff del DevTeam - revisores obligatorios para merge en main
+* @staff-devteam
+
+# Sobrescritura por rutas críticas (ajustar usuarios/equipos reales según el org de GitHub)
+/schemas/ @staff-devteam
+/prompts/ @staff-devteam
+/tools/ @staff-devteam
+/datasets/ @staff-devteam
+.github/ @staff-devteam
